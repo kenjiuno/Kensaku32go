@@ -1,0 +1,94 @@
+﻿<Window x:Class="Kensaku32go.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="検索32号" Height="600" Width="700" Loaded="Window_Loaded" Unloaded="Window_Unloaded" WindowStartupLocation="CenterScreen" Icon="resources\search.ico" Closed="Window_Closed">
+    <FrameworkElement.Resources>
+        <ContextMenu x:Key="menuItem">
+            <MenuItem Header="開く" Name="mOpenIt" Click="mOpenIt_Click" />
+            <MenuItem Header="場所" Name="mLocateIt" Click="mLocateIt_Click" />
+            <Separator />
+            <MenuItem Header="FTSを表示" Name="mViewIt" Click="mViewIt_Click" />
+        </ContextMenu>
+    </FrameworkElement.Resources>
+    <FrameworkElement.Triggers>
+        <EventTrigger RoutedEvent="Loaded">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="iUpd"
+                                     Storyboard.TargetProperty="(Image.RenderTransform).(RotateTransform.Angle)"
+                                     From="0" To="360" Duration="0:0:1" RepeatBehavior="Forever"
+                                     />
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </FrameworkElement.Triggers>
+    <Grid FocusManager.FocusedElement="{Binding ElementName=tbKws}" Margin="3">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <Grid VerticalAlignment="Top" Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="auto" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0" Target="{Binding ElementName=tbKws}">
+                <AccessText>検索キーワード(Alt+_D)：</AccessText>
+            </Label>
+            <TextBox Grid.Column="1" Name="tbKws" KeyDown="tbKws_KeyDown" VerticalContentAlignment="Center" />
+            <Button Grid.Column="2" Name="bSearch" Click="bSearch_Click">
+                <AccessText>検索(Alt+_S)</AccessText>
+            </Button>
+        </Grid>
+        <Label Grid.Row="1" Target="{Binding ElementName=lbItems}">
+            <AccessText >検索結果(Alt+_R)↓</AccessText>
+        </Label>
+        <ListBox Grid.Row="2" Name="lbItems" ItemsSource="{Binding}" DataContext="{x:Null}" MouseDoubleClick="lbItems_MouseDoubleClick" ContextMenu="{DynamicResource menuItem}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Label>
+                        <TextBlock>
+                            <TextBlock Text="{Binding Dir}" />\ <TextBlock Text="{Binding Name}" Foreground="BlueViolet" />
+                            <TextBlock Foreground="Gray">(<TextBlock Text="{Binding When}" />)</TextBlock>
+                            <LineBreak />
+                            <ItemsControl ItemsSource="{Binding}" DataContext="{Binding HLParts}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Vertical" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding Prev}" Foreground="Gray" />
+                                            <TextBlock Text="{Binding Hit}" FontWeight="Bold" />
+                                            <TextBlock Text="{Binding Next}" Foreground="Gray" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </TextBlock>
+                    </Label>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <Label Grid.Row="3">
+            <TextBlock>
+                <TextBlock Name="lUpd" Visibility="Collapsed" VerticalAlignment="Center">
+                    <Image Name="iUpd" VerticalAlignment="Center" Source="Resources/ajax-loader.gif" Width="16" Height="16" Margin="1" RenderTransformOrigin="0.5,0.5">
+	                <Image.RenderTransform>
+			            <RotateTransform Angle="0" />
+		            </Image.RenderTransform>
+                </Image>FTS更新中</TextBlock>
+                <TextBlock Name="lUpdDone" Visibility="Collapsed">FTS更新完了</TextBlock>
+                <TextBlock Name="lUpdFail" Visibility="Collapsed">FTS更新失敗!</TextBlock>
+                <TextBlock Name="lSe" Visibility="Collapsed">FTS検索中</TextBlock>
+                <TextBlock Name="lSeDone" Visibility="Collapsed">FTS検索完了</TextBlock>
+                <TextBlock Name="lSeFail" Visibility="Collapsed">FTS検索失敗!</TextBlock>
+            </TextBlock>
+        </Label>
+    </Grid>
+</Window>
