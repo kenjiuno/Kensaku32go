@@ -1,0 +1,13 @@
+﻿namespace Kensaku32go {
+	public class Strut {
+		public static int Next(string s, ref int x, int maxx) {
+***
+			if (x < maxx) {
+				char c = s[x];
+				x += 1;
+				return c;
+			}
+			return -1;
+		}
+	}
+}

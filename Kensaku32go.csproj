@@ -74,10 +74,6 @@
     <ApplicationIcon>Resources\search.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="LibNMeCab, Version=0.0.6.4, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\LibNMeCab.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.SQLite, Version=1.0.66.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139" Condition="'$(Platform)' == 'x86'">
@@ -105,6 +101,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Strut2.cs" />
+    <Compile Include="Tree16.cs" />
     <Compile Include="VWin.xaml.cs">
       <DependentUpon>VWin.xaml</DependentUpon>
     </Compile>
@@ -143,13 +141,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="dic\ipadic\char.bin" />
-    <None Include="dic\ipadic\dicrc" />
-    <None Include="dic\ipadic\matrix.bin" />
-    <None Include="dic\ipadic\sys.dic" />
-    <None Include="dic\ipadic\unk.dic" />
-    <None Include="dic\userdic\ns.csv" />
-    <None Include="dic\userdic\ns.dic" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -163,7 +154,6 @@
     <Resource Include="Resources\search.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="LibNMeCab.dll" />
     <Resource Include="Resources\ajax-loader.gif" />
   </ItemGroup>
   <ItemGroup />

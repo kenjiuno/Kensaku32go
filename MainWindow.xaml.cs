@@ -21,7 +21,6 @@ using System.Text.RegularExpressions;
 using System.Collections.ObjectModel;
 using Microsoft.Win32;
 using System.Data.SQLite;
-using NMeCab;
 using System.Data;
 
 namespace Kensaku32go {
@@ -48,7 +47,7 @@ namespace Kensaku32go {
                 sfd.Filter = "*.Kensaku32go|*.Kensaku32go";
                 sfd.CheckPathExists = true;
                 sfd.CheckFileExists = true;
-                sfd.FileName = "こちら";
+                sfd.FileName = "検索32号の辞書";
                 sfd.Title = "検索したい書類のフォルダで[保存]";
                 if (!(sfd.ShowDialog() ?? false)) {
                     Close();
@@ -65,15 +64,8 @@ namespace Kensaku32go {
             db.Open();
 
             {
-                var cm = new SQLiteCommand("create table if not exists f(i integer primary key autoincrement, fp text, mt integer, cb integer, fts1 text);", db);
+                var cm = new SQLiteCommand("create table if not exists f2(i integer primary key autoincrement, fp text, mt integer, cb integer, fts1 text);", db);
                 cm.ExecuteNonQuery();
-            }
-            {
-                DataTable dt = db.GetSchema("Columns", new String[] { null, null, "f", "fts2" });
-                if (dt.Select().Length == 0) {
-                    var cm = new SQLiteCommand("alter table f add column fts2 text;", db);
-                    cm.ExecuteNonQuery();
-                }
             }
 
             bwUpd.DoWork += bwUpd_DoWork;
@@ -107,7 +99,6 @@ namespace Kensaku32go {
             public bool need { get; set; }
 
             public String fts1 { get; set; }
-            public String fts2 { get; set; }
             public String Name { get; set; }
             public String Dir { get; set; }
             public List<Hiti> Pos2 { get; set; }
@@ -115,17 +106,19 @@ namespace Kensaku32go {
             public List<HLPart> HLParts {
                 get {
                     List<HLPart> al = new List<HLPart>();
-                    foreach (Hiti hi in Pos2) {
-                        int x1 = hi.x;
-                        int x2 = x1 + hi.cx;
-                        int x0 = Math.Max(0, hi.x - 10);
-                        int x3 = Math.Min(fts1.Length, x2 + 10);
-                        al.Add(new HLPart {
-                            Hit = SUt.L1(fts1.Substring(x1, x2 - x1)),
-                            Prev = SUt.L1(fts1.Substring(x0, x1 - x0)),
-                            Next = SUt.L1(fts1.Substring(x2, x3 - x2)),
-                        });
-                    }
+                    if (Pos2 != null)
+                        foreach (Hiti hi in Pos2) {
+                            int x1 = hi.x;
+                            int x2 = x1 + hi.cx;
+                            int x0 = Math.Max(0, hi.x - 10);
+                            int x3 = Math.Min(fts1.Length, x2 + 10);
+                            al.Add(new HLPart {
+                                Hit = SUt.L1(fts1.Substring(x1, x2 - x1)),
+                                Prev = SUt.L1(fts1.Substring(x0, x1 - x0)),
+                                Next = SUt.L1(fts1.Substring(x2, x3 - x2)),
+                                Pos = x1
+                            });
+                        }
                     return al;
                 }
             }
@@ -154,6 +147,11 @@ namespace Kensaku32go {
             public String Prev { get; set; }
             public String Hit { get; set; }
             public String Next { get; set; }
+            public int Pos { get; set; }
+
+            public string GetDisp() {
+                return Prev + "[" + Hit + "]" + Next;
+            }
         }
 
         void bwUpd_DoWork(object sender, DoWorkEventArgs e) {
@@ -163,7 +161,7 @@ namespace Kensaku32go {
                 String dir = io.Path.GetDirectoryName(fpdb);
                 String dir1 = dir + "\\";
                 {
-                    using (var dr = new SQLiteCommand("select i,fp,mt,cb from f", db).ExecuteReader()) {
+                    using (var dr = new SQLiteCommand("select i,fp,mt,cb from f2", db).ExecuteReader()) {
                         while (dr.Read()) {
                             var fp = dr.GetString(1);
                             ents[fp] = (new Ent {
@@ -178,28 +176,17 @@ namespace Kensaku32go {
                 dirs.Push(new io.DirectoryInfo(dir));
             }
 
-            var cmUp = new SQLiteCommand("update f set mt=@mt,cb=@cb,fts1=@fts1,fts2=@fts2 where i=@i", db);
+            var cmUp = new SQLiteCommand("update f2 set mt=@mt,cb=@cb,fts1=@fts1 where i=@i", db);
             cmUp.Parameters.Add("mt", System.Data.DbType.Int64);
             cmUp.Parameters.Add("cb", System.Data.DbType.Int64);
             cmUp.Parameters.Add("fts1", System.Data.DbType.String);
-            cmUp.Parameters.Add("fts2", System.Data.DbType.String);
             cmUp.Parameters.Add("i", System.Data.DbType.Int64);
 
-            var cmI = new SQLiteCommand("insert into f (fp,mt,cb,fts1,fts2) values (@fp,@mt,@cb,@fts1,@fts2)", db);
+            var cmI = new SQLiteCommand("insert into f2 (fp,mt,cb,fts1) values (@fp,@mt,@cb,@fts1)", db);
             cmI.Parameters.Add("fp", System.Data.DbType.String);
             cmI.Parameters.Add("mt", System.Data.DbType.Int64);
             cmI.Parameters.Add("cb", System.Data.DbType.Int64);
             cmI.Parameters.Add("fts1", System.Data.DbType.String);
-            cmI.Parameters.Add("fts2", System.Data.DbType.String);
-
-            // http://qiita.com/jacoyutorius/items/7f1867ae2de0da64ec46
-            MeCabParam param = new NMeCab.MeCabParam();
-            param.DicDir = io.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "dic", "ipadic");
-            // http://mecab.googlecode.com/svn/trunk/mecab/doc/dic.html
-            param.UserDic = new String[]{
-                io.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "dic", "userdic", "ns.dic"),
-            };
-            MeCabTagger t = MeCabTagger.Create(param);
 
             while (dirs.Count != 0) {
                 var di = dirs.Pop();
@@ -237,7 +224,6 @@ namespace Kensaku32go {
                                 int hr = LoadIFilter(fi.FullName, null, ref filter);
                                 if (hr != 0) throw Marshal.GetExceptionForHR(hr);
                                 StringWriter wr = new StringWriter();
-                                StringWriter wr2 = new StringWriter();
                                 try {
                                     IFILTER_FLAGS ff;
                                     hr = filter.Init(IFILTER_INIT.IFILTER_INIT_CANON_PARAGRAPHS | IFILTER_INIT.IFILTER_INIT_HARD_LINE_BREAKS | IFILTER_INIT.IFILTER_INIT_APPLY_INDEX_ATTRIBUTES,
@@ -265,20 +251,6 @@ namespace Kensaku32go {
 
                                         wr.WriteLine(row);
 
-                                        MeCabNode node = t.ParseToNode("" + row);
-                                        while (node != null) {
-                                            if (true
-                                                && node.Stat != MeCabNodeStat.Bos
-                                                && node.Stat != MeCabNodeStat.Eos
-                                            ) {
-                                                String[] cols = node.Feature.Split(',');
-                                                if (cols.Length == 9) {
-                                                    wr2.Write(cols[7]); //cols[8]?
-                                                }
-                                            }
-                                            node = node.Next;
-                                        }
-                                        wr2.WriteLine();
                                     }
                                 }
                                 finally {
@@ -289,7 +261,6 @@ namespace Kensaku32go {
                                     cmUp.Parameters["mt"].Value = fi.LastWriteTimeUtc.Ticks;
                                     cmUp.Parameters["cb"].Value = fi.Length;
                                     cmUp.Parameters["fts1"].Value = ("" + wr).Normalize();
-                                    cmUp.Parameters["fts2"].Value = ("" + wr2).Normalize();
                                     cmUp.Parameters["i"].Value = ent.i;
                                     cmUp.ExecuteNonQuery();
                                 }
@@ -298,7 +269,6 @@ namespace Kensaku32go {
                                     cmI.Parameters["mt"].Value = fi.LastWriteTimeUtc.Ticks;
                                     cmI.Parameters["cb"].Value = fi.Length;
                                     cmI.Parameters["fts1"].Value = ("" + wr).Normalize();
-                                    cmI.Parameters["fts2"].Value = ("" + wr2).Normalize();
                                     cmI.ExecuteNonQuery();
                                 }
                             }
@@ -310,7 +280,7 @@ namespace Kensaku32go {
                 }
             }
 
-            var cmD = new SQLiteCommand("delete from f where i=@i", db);
+            var cmD = new SQLiteCommand("delete from f2 where i=@i", db);
             cmD.Parameters.Add("i", System.Data.DbType.Int64);
             foreach (var ent in ents.Values) {
                 if (ent.need) continue;
@@ -711,16 +681,16 @@ namespace Kensaku32go {
                 bool all = true, any = false;
                 List<Hiti> pos2 = new List<Hiti>();
                 foreach (string kw in kws) {
-                    int i = fts1.IndexOf(kw, StringComparison.CurrentCultureIgnoreCase);
+                    int i = Strut2.IndexOf(fts1, kw, 0);
                     if (i >= 0) {
                         any = true;
                         pos2.Add(new Hiti { x = i, cx = kw.Length });
 
-                        int i2 = fts1.IndexOf(kw, i + kw.Length, StringComparison.CurrentCultureIgnoreCase);
+                        int i2 = Strut2.IndexOf(fts1, kw, i + kw.Length);
                         if (i2 >= 0) {
                             pos2.Add(new Hiti { x = i2, cx = kw.Length });
 
-                            int i3 = fts1.IndexOf(kw, i2 + kw.Length, StringComparison.CurrentCultureIgnoreCase);
+                            int i3 = Strut2.IndexOf(fts1, kw, i2 + kw.Length);
                             if (i3 >= 0) {
                                 pos2.Add(new Hiti { x = i3, cx = kw.Length });
                             }
@@ -735,15 +705,34 @@ namespace Kensaku32go {
                 }
                 return null;
             }
+
+            public static bool Hitt(string fp, string[] kws) {
+                bool all = true, any = false;
+                foreach (string kw in kws) {
+                    int i = Strut2.IndexOf(fp, kw, 0);
+                    if (i >= 0) {
+                        any = true;
+                    }
+                    else {
+                        all = false;
+                    }
+                }
+                if (all && any) {
+                    return true;
+                }
+                return false;
+            }
         }
 
         void bwSe_DoWork(object sender, DoWorkEventArgs e) {
             String[] kws = Regex.Replace("" + e.Argument, "[\\s　]+", " ").Trim().Split(' ');
-            SQLiteCommand cm = new SQLiteCommand("select fts1,fp,mt,cb,i from f order by mt desc", db);
+            SQLiteCommand cm = new SQLiteCommand("select fts1,fp,mt,cb,i from f2 order by mt desc", db);
             using (var dr = cm.ExecuteReader()) {
                 while (dr.Read()) {
                     String fts1 = dr.GetString(0);
                     Ent ent = Uts.Search(fts1, kws);
+                    if (Uts.Hitt(dr.GetString(1), kws))
+                        ent = new Ent { fts1 = fts1 };
                     if (ent != null) {
                         ent.fp = dr.GetString(1);
                         ent.mt = dr.GetInt64(2);
@@ -805,11 +794,81 @@ namespace Kensaku32go {
             var ent = lbItems.SelectedItem as Ent;
             if (ent != null) {
                 VWin vw = new VWin();
+                List<Seli> alSeli = new List<Seli>();
+                alSeli.Add(new Seli { });
                 var fd = vw.rtb.Document;
-                fd.Blocks.Add(new Paragraph(new Run { Text = ent.fts1 }));
+                int x1 = 0;
+                foreach (String row in ent.fts1.Split('\n')) {
+                    int x2 = x1 + row.Length;
+                    Divi divi = new Divi(x1, x2);
+                    List<HLPart> alh = new List<HLPart>();
+                    foreach (var hlp in ent.HLParts) {
+                        if (x1 <= hlp.Pos && hlp.Pos <= x2) {
+                            divi.Insert(hlp.Pos, hlp.Pos + hlp.Hit.Length, "" + alh.Count);
+                            alh.Add(hlp);
+                        }
+                    }
+                    Paragraph p;
+                    fd.Blocks.Add(p = new Paragraph());
+                    bool hl = false;
+                    foreach (Spli s in divi.al) {
+                        Run r = new Run { Text = row.Substring(s.x1 - x1, s.x2 - s.x1) };
+                        if (s.k != null) {
+                            int ih = int.Parse(s.k);
+                            r.FontWeight = FontWeights.Bold;
+                            r.Background = Brushes.Yellow;
+                            r.Foreground = Brushes.Black;
+                            hl = true;
+                            alSeli.Add(new Seli { Pos = r, Disp = alh[ih].GetDisp() });
+                        }
+
+                        p.Inlines.Add(r);
+                    }
+                    if (hl)
+                        p.TextDecorations.Add(TextDecorations.Underline);
+                    x1 = x2 + 1;
+                }
+                vw.cb.DataContext = alSeli;
                 vw.Owner = this;
                 vw.Show();
             }
+        }
+
+        class Spli {
+            public int x1 { get; set; }
+            public int x2 { get; set; }
+            public String k { get; set; }
+        }
+        class Divi {
+            public List<Spli> al = new List<Spli>();
+
+            public Divi(int x1, int x2) {
+                al.Add(new Spli { x1 = x1, x2 = x2 });
+            }
+
+            public void Insert(int p1, int p2, String k) {
+                for (int y = 0; y < al.Count; y++) {
+                    Spli s = al[y];
+                    if (s.x1 <= p1 && p2 <= s.x2) {
+                        Spli s1 = new Spli { x1 = p1, x2 = p2, k = k };
+                        Spli s2 = new Spli { x1 = p2, x2 = s.x2, k = s.k };
+                        s.x2 = p1;
+                        al.Insert(y + 1, s1);
+                        al.Insert(y + 2, s2);
+                        y += 2;
+                    }
+
+                }
+            }
+        }
+    }
+
+    class Seli {
+        public Inline Pos { get; set; }
+        public String Disp { get; set; }
+
+        public override string ToString() {
+            return Disp;
         }
     }
 }

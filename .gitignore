@@ -1,5 +1,5 @@
-/*.user
-/*.suo
 /Setup_Kensaku32go.exe
-/bin
-/obj
+bin
+obj
+*.user
+*.suo
