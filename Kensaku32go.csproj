@@ -143,21 +143,13 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="dic\ipadic\char.bin">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="dic\ipadic\dicrc">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="dic\ipadic\matrix.bin">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="dic\ipadic\sys.dic">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="dic\ipadic\unk.dic">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Include="dic\ipadic\char.bin" />
+    <None Include="dic\ipadic\dicrc" />
+    <None Include="dic\ipadic\matrix.bin" />
+    <None Include="dic\ipadic\sys.dic" />
+    <None Include="dic\ipadic\unk.dic" />
+    <None Include="dic\userdic\ns.csv" />
+    <None Include="dic\userdic\ns.dic" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -174,6 +166,7 @@
     <Content Include="LibNMeCab.dll" />
     <Resource Include="Resources\ajax-loader.gif" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>

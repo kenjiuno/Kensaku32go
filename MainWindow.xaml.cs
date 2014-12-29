@@ -22,6 +22,7 @@ using System.Collections.ObjectModel;
 using Microsoft.Win32;
 using System.Data.SQLite;
 using NMeCab;
+using System.Data;
 
 namespace Kensaku32go {
     /// <summary>
@@ -67,6 +68,13 @@ namespace Kensaku32go {
                 var cm = new SQLiteCommand("create table if not exists f(i integer primary key autoincrement, fp text, mt integer, cb integer, fts1 text);", db);
                 cm.ExecuteNonQuery();
             }
+            {
+                DataTable dt = db.GetSchema("Columns", new String[] { null, null, "f", "fts2" });
+                if (dt.Select().Length == 0) {
+                    var cm = new SQLiteCommand("alter table f add column fts2 text;", db);
+                    cm.ExecuteNonQuery();
+                }
+            }
 
             bwUpd.DoWork += bwUpd_DoWork;
             bwUpd.WorkerSupportsCancellation = true;
@@ -99,6 +107,7 @@ namespace Kensaku32go {
             public bool need { get; set; }
 
             public String fts1 { get; set; }
+            public String fts2 { get; set; }
             public String Name { get; set; }
             public String Dir { get; set; }
             public List<Hiti> Pos2 { get; set; }
@@ -169,17 +178,28 @@ namespace Kensaku32go {
                 dirs.Push(new io.DirectoryInfo(dir));
             }
 
-            var cmUp = new SQLiteCommand("update f set mt=@mt,cb=@cb,fts1=@fts1 where i=@i", db);
+            var cmUp = new SQLiteCommand("update f set mt=@mt,cb=@cb,fts1=@fts1,fts2=@fts2 where i=@i", db);
             cmUp.Parameters.Add("mt", System.Data.DbType.Int64);
             cmUp.Parameters.Add("cb", System.Data.DbType.Int64);
             cmUp.Parameters.Add("fts1", System.Data.DbType.String);
+            cmUp.Parameters.Add("fts2", System.Data.DbType.String);
             cmUp.Parameters.Add("i", System.Data.DbType.Int64);
 
-            var cmI = new SQLiteCommand("insert into f (fp,mt,cb,fts1) values (@fp,@mt,@cb,@fts1)", db);
+            var cmI = new SQLiteCommand("insert into f (fp,mt,cb,fts1,fts2) values (@fp,@mt,@cb,@fts1,@fts2)", db);
             cmI.Parameters.Add("fp", System.Data.DbType.String);
             cmI.Parameters.Add("mt", System.Data.DbType.Int64);
             cmI.Parameters.Add("cb", System.Data.DbType.Int64);
             cmI.Parameters.Add("fts1", System.Data.DbType.String);
+            cmI.Parameters.Add("fts2", System.Data.DbType.String);
+
+            // http://qiita.com/jacoyutorius/items/7f1867ae2de0da64ec46
+            MeCabParam param = new NMeCab.MeCabParam();
+            param.DicDir = io.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "dic", "ipadic");
+            // http://mecab.googlecode.com/svn/trunk/mecab/doc/dic.html
+            param.UserDic = new String[]{
+                io.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "dic", "userdic", "ns.dic"),
+            };
+            MeCabTagger t = MeCabTagger.Create(param);
 
             while (dirs.Count != 0) {
                 var di = dirs.Pop();
@@ -217,6 +237,7 @@ namespace Kensaku32go {
                                 int hr = LoadIFilter(fi.FullName, null, ref filter);
                                 if (hr != 0) throw Marshal.GetExceptionForHR(hr);
                                 StringWriter wr = new StringWriter();
+                                StringWriter wr2 = new StringWriter();
                                 try {
                                     IFILTER_FLAGS ff;
                                     hr = filter.Init(IFILTER_INIT.IFILTER_INIT_CANON_PARAGRAPHS | IFILTER_INIT.IFILTER_INIT_HARD_LINE_BREAKS | IFILTER_INIT.IFILTER_INIT_APPLY_INDEX_ATTRIBUTES,
@@ -232,18 +253,32 @@ namespace Kensaku32go {
                                         hr = filter.GetChunk(out chunk);
                                         if (hr != 0) break;
 
-                                        wr.Write("");
+                                        String row = "";
                                         while (true) {
                                             int cwc = 30000;
                                             hr = filter.GetText(ref cwc, str);
                                             if (hr != 0) break;
 
                                             str.Length = cwc;
-                                            wr.Write("" + str + "");
-
+                                            row += "" + str;
                                         }
-                                        wr.Write("");
-                                        wr.WriteLine();
+
+                                        wr.WriteLine(row);
+
+                                        MeCabNode node = t.ParseToNode("" + row);
+                                        while (node != null) {
+                                            if (true
+                                                && node.Stat != MeCabNodeStat.Bos
+                                                && node.Stat != MeCabNodeStat.Eos
+                                            ) {
+                                                String[] cols = node.Feature.Split(',');
+                                                if (cols.Length == 9) {
+                                                    wr2.Write(cols[7]); //cols[8]?
+                                                }
+                                            }
+                                            node = node.Next;
+                                        }
+                                        wr2.WriteLine();
                                     }
                                 }
                                 finally {
@@ -254,6 +289,7 @@ namespace Kensaku32go {
                                     cmUp.Parameters["mt"].Value = fi.LastWriteTimeUtc.Ticks;
                                     cmUp.Parameters["cb"].Value = fi.Length;
                                     cmUp.Parameters["fts1"].Value = ("" + wr).Normalize();
+                                    cmUp.Parameters["fts2"].Value = ("" + wr2).Normalize();
                                     cmUp.Parameters["i"].Value = ent.i;
                                     cmUp.ExecuteNonQuery();
                                 }
@@ -262,6 +298,7 @@ namespace Kensaku32go {
                                     cmI.Parameters["mt"].Value = fi.LastWriteTimeUtc.Ticks;
                                     cmI.Parameters["cb"].Value = fi.Length;
                                     cmI.Parameters["fts1"].Value = ("" + wr).Normalize();
+                                    cmI.Parameters["fts2"].Value = ("" + wr2).Normalize();
                                     cmI.ExecuteNonQuery();
                                 }
                             }

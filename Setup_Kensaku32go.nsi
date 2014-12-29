@@ -49,7 +49,7 @@ SectionEnd ; end the section
 
 Function Shtcut
   StrCpy $1 "$DESKTOP"
-  CreateShortCut "$1\V‚µ‚­ŒŸõ32†.lnk" "$INSTDIR\${APP}.exe"
+  CreateShortCut "$1\ŒŸõ32†.lnk" "$INSTDIR\${APP}.exe"
 
   StrCpy $1 "$SMPROGRAMS\ŒŸõ32†"
   CreateDirectory $1
@@ -58,7 +58,7 @@ Function Shtcut
   CreateShortCut "$1\Kensaku32go.lnk" "$INSTDIR\${APP}.exe"
   
   WriteRegStr HKCU "Software\Classes\.Kensaku32go" "" "Kensaku32go"
-  WriteRegStr HKCU "Software\Classes\.Kensaku32go\ShellNew" "ItemName" "‚±‚¿‚ç"
+  WriteRegStr HKCU "Software\Classes\.Kensaku32go\ShellNew" "ItemName" "ŒŸõ32†‚Ì«‘"
   WriteRegStr HKCU "Software\Classes\.Kensaku32go\ShellNew" "NullFile" ""
 
   WriteRegStr HKCU "Software\Classes\Kensaku32go" "" "ŒŸõ32†"
