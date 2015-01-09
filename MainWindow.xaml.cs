@@ -31,6 +31,7 @@ namespace Kensaku32go {
         public MainWindow() {
             InitializeComponent();
 
+            Title += " v" + typeof(App).Assembly.GetName().Version.ToString(2);
             Title += " " + ((IntPtr.Size == 4) ? "(32ビット)" : "(64ビット)");
         }
 
