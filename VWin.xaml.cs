@@ -25,7 +25,9 @@ namespace Kensaku32go {
             if (seli != null && seli.Pos != null) {
                 rtb.Selection.Select(seli.Pos.ElementStart, seli.Pos.ElementEnd);
                 rtb.Focus();
-                seli.Pos.BringIntoView();
+                var p = seli.Pos.Parent as Paragraph;
+                if (p != null) p.BringIntoView();
+                else seli.Pos.BringIntoView();
             }
         }
     }
