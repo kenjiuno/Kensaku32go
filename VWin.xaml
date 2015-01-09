@@ -1,16 +1,20 @@
 ﻿<Window x:Class="Kensaku32go.VWin"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="FTS情報" Height="412" Width="581" WindowStartupLocation="CenterOwner">
+        Title="FTS情報" Height="412" Width="636" WindowStartupLocation="CenterOwner">
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-        <ComboBox Name="cb" Grid.Row="0" ItemsSource="{Binding}" DataContext="{x:Null}" SelectionChanged="cb_SelectionChanged" FontSize="14">
-            
-        </ComboBox>
-        <RichTextBox Name="rtb" Grid.Row="1" ScrollViewer.VerticalScrollBarVisibility="Visible" FontSize="14">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="170" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <ListBox Grid.Column="0" Name="lbItems" ItemsSource="{Binding}" DataContext="{x:Null}" SelectionChanged="cb_SelectionChanged" FontSize="14" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding}" TextWrapping="Wrap" />
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <RichTextBox Name="rtb" Grid.Column="1" ScrollViewer.VerticalScrollBarVisibility="Visible" FontSize="14">
         </RichTextBox>
     </Grid>
 </Window>

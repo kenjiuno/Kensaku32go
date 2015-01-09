@@ -795,8 +795,17 @@ namespace Kensaku32go {
             if (ent != null) {
                 VWin vw = new VWin();
                 List<Seli> alSeli = new List<Seli>();
-                alSeli.Add(new Seli { });
                 var fd = vw.rtb.Document;
+                {
+                    Paragraph p = new Paragraph();
+                    fd.Blocks.Add(p);
+                    var fn = io.Path.GetFileNameWithoutExtension(ent.fp);
+                    var r = new Run(fn);
+                    p.Inlines.Add(r);
+
+                    alSeli.Add(new Seli { Pos = r, Disp = fn });
+
+                }
                 int x1 = 0;
                 foreach (String row in ent.fts1.Split('\n')) {
                     int x2 = x1 + row.Length;
@@ -828,7 +837,7 @@ namespace Kensaku32go {
                         p.TextDecorations.Add(TextDecorations.Underline);
                     x1 = x2 + 1;
                 }
-                vw.cb.DataContext = alSeli;
+                vw.lbItems.DataContext = alSeli;
                 vw.Owner = this;
                 vw.Show();
             }

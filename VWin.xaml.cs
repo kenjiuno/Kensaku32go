@@ -21,7 +21,7 @@ namespace Kensaku32go {
         }
 
         private void cb_SelectionChanged(object sender, SelectionChangedEventArgs e) {
-            var seli = cb.SelectedItem as Seli;
+            var seli = lbItems.SelectedItem as Seli;
             if (seli != null && seli.Pos != null) {
                 rtb.Selection.Select(seli.Pos.ElementStart, seli.Pos.ElementEnd);
                 rtb.Focus();
