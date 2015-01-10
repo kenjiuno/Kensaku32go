@@ -82,12 +82,21 @@
 	                <Image.RenderTransform>
 			            <RotateTransform Angle="0" />
 		            </Image.RenderTransform>
-                </Image>FTS更新中</TextBlock>
-                <TextBlock Name="lUpdDone" Visibility="Collapsed">FTS更新完了</TextBlock>
-                <TextBlock Name="lUpdFail" Visibility="Collapsed">FTS更新失敗!</TextBlock>
-                <TextBlock Name="lSe" Visibility="Collapsed">FTS検索中</TextBlock>
-                <TextBlock Name="lSeDone" Visibility="Collapsed">FTS検索完了</TextBlock>
-                <TextBlock Name="lSeFail" Visibility="Collapsed">FTS検索失敗!</TextBlock>
+                </Image>さくいん、更新中</TextBlock>
+                <StackPanel Name="lUpdDone" Visibility="Collapsed" VerticalAlignment="Center" Orientation="Horizontal">
+                    <Image VerticalAlignment="Center" Source="Resources/StatusAnnotations_Complete_and_ok_16xLG_color.png" Width="16" Height="16" Margin="1" />
+                    <TextBlock VerticalAlignment="Center">さくいん、更新完了</TextBlock></StackPanel>
+                <StackPanel Name="lUpdFail" Visibility="Collapsed" VerticalAlignment="Center">
+                    <Image VerticalAlignment="Center" Source="Resources/StatusAnnotations_Critical_16xLG_color.png" Width="16" Height="16" Margin="1" />
+                    <TextBlock VerticalAlignment="Center">さくいん、更新失敗!</TextBlock></StackPanel>
+
+                <TextBlock Name="lSe" Visibility="Collapsed">検索中</TextBlock>
+                <StackPanel Name="lSeDone" Visibility="Collapsed" VerticalAlignment="Center">
+                    <Image VerticalAlignment="Center" Source="Resources/StatusAnnotations_Complete_and_ok_16xLG_color.png" Width="16" Height="16" Margin="1" />
+                    <TextBlock VerticalAlignment="Center">検索完了。<Run Name="rTot" />件</TextBlock></StackPanel>
+                <StackPanel Name="lSeFail" Visibility="Collapsed" VerticalAlignment="Center">
+                    <Image VerticalAlignment="Center" Source="Resources/StatusAnnotations_Critical_16xLG_color.png" Width="16" Height="16" Margin="1" />
+                    <TextBlock VerticalAlignment="Center">検索失敗!</TextBlock></StackPanel>
             </TextBlock>
         </Label>
     </Grid>

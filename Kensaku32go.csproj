@@ -156,7 +156,10 @@
   <ItemGroup>
     <Resource Include="Resources\ajax-loader.gif" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Resources\StatusAnnotations_Complete_and_ok_16xLG_color.png" />
+    <Resource Include="Resources\StatusAnnotations_Critical_16xLG_color.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>

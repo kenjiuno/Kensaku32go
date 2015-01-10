@@ -660,6 +660,7 @@ namespace Kensaku32go {
         void bwSe_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) {
             bSearch.IsEnabled = true;
             lSe.Visibility = System.Windows.Visibility.Collapsed;
+            rTot.Text = String.Format("{0:#,##0}", alent.Count);
             if (e.Error == null) {
                 lSeDone.Visibility = System.Windows.Visibility.Visible;
                 lSeFail.Visibility = System.Windows.Visibility.Collapsed;
