@@ -4,10 +4,10 @@
         Title="検索32号" Height="600" Width="700" Loaded="Window_Loaded" Unloaded="Window_Unloaded" WindowStartupLocation="CenterScreen" Icon="resources\search.ico" Closed="Window_Closed">
     <FrameworkElement.Resources>
         <ContextMenu x:Key="menuItem">
-            <MenuItem Header="開く" Name="mOpenIt" Click="mOpenIt_Click" />
-            <MenuItem Header="場所" Name="mLocateIt" Click="mLocateIt_Click" />
+            <MenuItem Header="ファイルを開く" Name="mOpenIt" Click="mOpenIt_Click" />
+            <MenuItem Header="ファイルの場所" Name="mLocateIt" Click="mLocateIt_Click" />
             <Separator />
-            <MenuItem Header="FTSを表示" Name="mViewIt" Click="mViewIt_Click" />
+            <MenuItem Header="検索結果を強調して表示" Name="mViewIt" Click="mViewIt_Click" />
         </ContextMenu>
     </FrameworkElement.Resources>
     <FrameworkElement.Triggers>
