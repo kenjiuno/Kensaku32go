@@ -18,6 +18,10 @@
                                      Storyboard.TargetProperty="(Image.RenderTransform).(RotateTransform.Angle)"
                                      From="0" To="360" Duration="0:0:1" RepeatBehavior="Forever"
                                      />
+                    <DoubleAnimation Storyboard.TargetName="iSe"
+                                     Storyboard.TargetProperty="(Image.RenderTransform).(RotateTransform.Angle)"
+                                     From="0" To="360" Duration="0:0:1" RepeatBehavior="Forever"
+                                     />
                 </Storyboard>
             </BeginStoryboard>
         </EventTrigger>
@@ -77,12 +81,14 @@
         </ListBox>
         <Label Grid.Row="3">
             <TextBlock>
-                <TextBlock Name="lUpd" Visibility="Collapsed" VerticalAlignment="Center">
+                <StackPanel Name="lUpd" Visibility="Collapsed" VerticalAlignment="Center">
                     <Image Name="iUpd" VerticalAlignment="Center" Source="Resources/ajax-loader.gif" Width="16" Height="16" Margin="1" RenderTransformOrigin="0.5,0.5">
-	                <Image.RenderTransform>
-			            <RotateTransform Angle="0" />
-		            </Image.RenderTransform>
-                </Image>さくいん、更新中</TextBlock>
+	                    <Image.RenderTransform>
+    			            <RotateTransform Angle="0" />
+		                </Image.RenderTransform>
+                    </Image>
+                    <TextBlock VerticalAlignment="Center">さくいん、更新中</TextBlock>
+                </StackPanel>
                 <StackPanel Name="lUpdDone" Visibility="Collapsed" VerticalAlignment="Center" Orientation="Horizontal">
                     <Image VerticalAlignment="Center" Source="Resources/StatusAnnotations_Complete_and_ok_16xLG_color.png" Width="16" Height="16" Margin="1" />
                     <TextBlock VerticalAlignment="Center">さくいん、更新完了</TextBlock></StackPanel>
@@ -90,11 +96,18 @@
                     <Image VerticalAlignment="Center" Source="Resources/StatusAnnotations_Critical_16xLG_color.png" Width="16" Height="16" Margin="1" />
                     <TextBlock VerticalAlignment="Center">さくいん、更新失敗!</TextBlock></StackPanel>
 
-                <TextBlock Name="lSe" Visibility="Collapsed">検索中</TextBlock>
-                <StackPanel Name="lSeDone" Visibility="Collapsed" VerticalAlignment="Center">
+                <StackPanel Name="lSe" Visibility="Collapsed" VerticalAlignment="Center" Orientation="Horizontal">
+                    <Image Name="iSe" VerticalAlignment="Center" Source="Resources/ajax-loader.gif" Width="16" Height="16" Margin="1" RenderTransformOrigin="0.5,0.5">
+    	                <Image.RenderTransform>
+			                <RotateTransform Angle="0" />
+		                </Image.RenderTransform>
+                    </Image>
+                    <TextBlock VerticalAlignment="Center">検索中</TextBlock>
+                </StackPanel>
+                <StackPanel Name="lSeDone" Visibility="Collapsed" VerticalAlignment="Center" Orientation="Horizontal">
                     <Image VerticalAlignment="Center" Source="Resources/StatusAnnotations_Complete_and_ok_16xLG_color.png" Width="16" Height="16" Margin="1" />
                     <TextBlock VerticalAlignment="Center">検索完了。<Run Name="rTot" />件</TextBlock></StackPanel>
-                <StackPanel Name="lSeFail" Visibility="Collapsed" VerticalAlignment="Center">
+                <StackPanel Name="lSeFail" Visibility="Collapsed" VerticalAlignment="Center" Orientation="Horizontal">
                     <Image VerticalAlignment="Center" Source="Resources/StatusAnnotations_Critical_16xLG_color.png" Width="16" Height="16" Margin="1" />
                     <TextBlock VerticalAlignment="Center">検索失敗!</TextBlock></StackPanel>
             </TextBlock>

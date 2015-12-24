@@ -60,6 +60,7 @@ namespace Kensaku32go {
             SQLiteConnectionStringBuilder b = new SQLiteConnectionStringBuilder();
             b.DataSource = fpdb;
             b.DateTimeKind = DateTimeKind.Utc;
+            b.JournalMode = SQLiteJournalModeEnum.Memory;
 
             db = new SQLiteConnection(b.ConnectionString);
             db.Open();

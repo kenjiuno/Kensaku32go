@@ -64,7 +64,7 @@ Function Shtcut
   WriteRegStr HKCU "Software\Classes\Kensaku32go" "" "åüçı32çÜ"
   WriteRegStr HKCU "Software\Classes\Kensaku32go" "NeverShowExt" ""
   WriteRegStr HKCU "Software\Classes\Kensaku32go\DefaultIcon" "" "$INSTDIR\${APP}.exe"
-  WriteRegStr HKCU "Software\Classes\Kensaku32go\shell\open\command" "" '"$INSTDIR\${APP}.exe" %1'
+  WriteRegStr HKCU "Software\Classes\Kensaku32go\shell\open\command" "" '"$INSTDIR\${APP}.exe" "%1"'
 
   System::Call 'Shell32::SHChangeNotify(i 0x8000000, i 0, i 0, i 0)'
 FunctionEnd
