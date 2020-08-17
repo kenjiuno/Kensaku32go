@@ -1,4 +1,4 @@
-; example1.nsi
+Ôªø; example1.nsi
 ;
 ; This script is perhaps one of the simplest NSIs you can make. All of the
 ; optional settings are left to their default settings. The installer simply 
@@ -7,8 +7,14 @@
 
 ;--------------------------------
 
+Unicode true
+
+SetCompressor /solid lzma
+
+!include "MUI2.nsh"
+
 !define APP "Kensaku32go"
-!define TTL "åüçı32çÜ"
+!define TTL "Ê§úÁ¥¢32Âè∑"
 
 ; The name of the installer
 Name "${TTL}"
@@ -22,15 +28,21 @@ InstallDir "$APPDATA\${APP}"
 ; Request application privileges for Windows Vista
 RequestExecutionLevel user
 
+XPStyle on
+
+!define MUI_ABORTWARNING
+
 ;--------------------------------
 
 ; Pages
 
-Page directory
-Page components
-Page instfiles
+!insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_COMPONENTS
+!insertmacro MUI_PAGE_INSTFILES
 
 ;--------------------------------
+
+!insertmacro MUI_LANGUAGE "Japanese"
 
 !include "LogicLib.nsh"
 !include "x64.nsh"
@@ -48,20 +60,11 @@ Section "" ;No components page, name is not important
 SectionEnd ; end the section
 
 Function Shtcut
-  StrCpy $1 "$DESKTOP"
-  CreateShortCut "$1\åüçı32çÜ.lnk" "$INSTDIR\${APP}.exe"
-
-  StrCpy $1 "$SMPROGRAMS\åüçı32çÜ"
-  CreateDirectory $1
-  CreateShortCut "$1\åüçı32çÜ.lnk" "$INSTDIR\${APP}.exe"
-  CreateShortCut "$1\ÇØÇÒÇ≥Ç≠32Ç≤Ç§.lnk" "$INSTDIR\${APP}.exe"
-  CreateShortCut "$1\Kensaku32go.lnk" "$INSTDIR\${APP}.exe"
-  
   WriteRegStr HKCU "Software\Classes\.Kensaku32go" "" "Kensaku32go"
-  WriteRegStr HKCU "Software\Classes\.Kensaku32go\ShellNew" "ItemName" "åüçı32çÜÇÃé´èë"
+  WriteRegStr HKCU "Software\Classes\.Kensaku32go\ShellNew" "ItemName" "Ê§úÁ¥¢32Âè∑„ÅÆËæûÊõ∏"
   WriteRegStr HKCU "Software\Classes\.Kensaku32go\ShellNew" "NullFile" ""
 
-  WriteRegStr HKCU "Software\Classes\Kensaku32go" "" "åüçı32çÜ"
+  WriteRegStr HKCU "Software\Classes\Kensaku32go" "" "Ê§úÁ¥¢32Âè∑"
   WriteRegStr HKCU "Software\Classes\Kensaku32go" "NeverShowExt" ""
   WriteRegStr HKCU "Software\Classes\Kensaku32go\DefaultIcon" "" "$INSTDIR\${APP}.exe"
   WriteRegStr HKCU "Software\Classes\Kensaku32go\shell\open\command" "" '"$INSTDIR\${APP}.exe" "%1"'

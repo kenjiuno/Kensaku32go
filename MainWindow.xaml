@@ -1,4 +1,4 @@
-﻿<Window x:Class="Kensaku32go.MainWindow"
+<Window x:Class="Kensaku32go.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="検索32号" Height="600" Width="700" Loaded="Window_Loaded" Unloaded="Window_Unloaded" WindowStartupLocation="CenterScreen" Icon="resources\search.ico" Closed="Window_Closed">
@@ -14,11 +14,11 @@
         <EventTrigger RoutedEvent="Loaded">
             <BeginStoryboard>
                 <Storyboard>
-                    <DoubleAnimation Storyboard.TargetName="iUpd"
+                    <DoubleAnimation Storyboard.TargetName="imageAjaxLoader1"
                                      Storyboard.TargetProperty="(Image.RenderTransform).(RotateTransform.Angle)"
                                      From="0" To="360" Duration="0:0:1" RepeatBehavior="Forever"
                                      />
-                    <DoubleAnimation Storyboard.TargetName="iSe"
+                    <DoubleAnimation Storyboard.TargetName="imageAjaxLoader2"
                                      Storyboard.TargetProperty="(Image.RenderTransform).(RotateTransform.Angle)"
                                      From="0" To="360" Duration="0:0:1" RepeatBehavior="Forever"
                                      />
@@ -30,8 +30,8 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
-            <RowDefinition Height="*" />
             <RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid VerticalAlignment="Top" Grid.Row="0">
             <Grid.ColumnDefinitions>
@@ -47,10 +47,48 @@
                 <AccessText>検索(Alt+_S)</AccessText>
             </Button>
         </Grid>
-        <Label Grid.Row="1" Target="{Binding ElementName=lbItems}">
+        <TabControl Grid.Row="1">
+            <TabItem Header="作業">
+                <StackPanel Orientation="Vertical" Name="panelsPanel">
+                    <StackPanel Name="panelUpdating" Visibility="Visible" Orientation="Horizontal">
+                        <Image Name="imageAjaxLoader1" VerticalAlignment="Center" Source="Resources/ajax-loader.gif" Width="16" Height="16" Margin="1" RenderTransformOrigin="0.5,0.5">
+                            <Image.RenderTransform>
+                                <RotateTransform Angle="0" />
+                            </Image.RenderTransform>
+                        </Image>
+                        <TextBlock VerticalAlignment="Center">さくいん、更新中</TextBlock>
+                    </StackPanel>
+                    <StackPanel Name="panelUpdated" Visibility="Visible" VerticalAlignment="Center" Orientation="Horizontal">
+                        <Image VerticalAlignment="Center" Source="Resources/StatusAnnotations_Complete_and_ok_16xLG_color.png" Width="16" Height="16" Margin="1" />
+                        <TextBlock VerticalAlignment="Center">さくいん、更新完了 (<Run Name="numUpdated" Text="?" /> 件更新成功、<Run Name="numFailed" Text="?" /> 件更新エラー)</TextBlock>
+                    </StackPanel>
+                    <StackPanel Name="panelUpdateFailed" Visibility="Visible" Orientation="Horizontal">
+                        <Image VerticalAlignment="Center" Source="Resources/StatusAnnotations_Critical_16xLG_color.png" Width="16" Height="16" Margin="1" />
+                        <TextBlock VerticalAlignment="Center">さくいん、更新失敗!</TextBlock>
+                    </StackPanel>
+                    <StackPanel Name="panelSearching" Visibility="Visible" Orientation="Horizontal">
+                        <Image Name="imageAjaxLoader2" VerticalAlignment="Center" Source="Resources/ajax-loader.gif" Width="16" Height="16" Margin="1" RenderTransformOrigin="0.5,0.5">
+                            <Image.RenderTransform>
+                                <RotateTransform Angle="0" />
+                            </Image.RenderTransform>
+                        </Image>
+                        <TextBlock VerticalAlignment="Center">検索中</TextBlock>
+                    </StackPanel>
+                    <StackPanel Name="panelSearchDone" Visibility="Visible" VerticalAlignment="Center" Orientation="Horizontal">
+                        <Image VerticalAlignment="Center" Source="Resources/StatusAnnotations_Complete_and_ok_16xLG_color.png" Width="16" Height="16" Margin="1" />
+                        <TextBlock VerticalAlignment="Center">検索完了。<Run Name="rTot" />件</TextBlock>
+                    </StackPanel>
+                    <StackPanel Name="panelSearchFail" Visibility="Collapsed" VerticalAlignment="Center" Orientation="Horizontal">
+                        <Image VerticalAlignment="Center" Source="Resources/StatusAnnotations_Critical_16xLG_color.png" Width="16" Height="16" Margin="1" />
+                        <TextBlock VerticalAlignment="Center">検索失敗!</TextBlock>
+                    </StackPanel>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+        <Label Grid.Row="2" Target="{Binding ElementName=lbItems}">
             <AccessText >検索結果(Alt+_R)↓</AccessText>
         </Label>
-        <ListBox Grid.Row="2" Name="lbItems" ItemsSource="{Binding}" DataContext="{x:Null}" MouseDoubleClick="lbItems_MouseDoubleClick" ContextMenu="{DynamicResource menuItem}">
+        <ListBox Grid.Row="3" Name="lbItems" ItemsSource="{Binding}" DataContext="{x:Null}" MouseDoubleClick="lbItems_MouseDoubleClick" ContextMenu="{DynamicResource menuItem}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Label>
@@ -79,38 +117,5 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <Label Grid.Row="3">
-            <TextBlock>
-                <StackPanel Name="lUpd" Visibility="Collapsed" VerticalAlignment="Center">
-                    <Image Name="iUpd" VerticalAlignment="Center" Source="Resources/ajax-loader.gif" Width="16" Height="16" Margin="1" RenderTransformOrigin="0.5,0.5">
-	                    <Image.RenderTransform>
-    			            <RotateTransform Angle="0" />
-		                </Image.RenderTransform>
-                    </Image>
-                    <TextBlock VerticalAlignment="Center">さくいん、更新中</TextBlock>
-                </StackPanel>
-                <StackPanel Name="lUpdDone" Visibility="Collapsed" VerticalAlignment="Center" Orientation="Horizontal">
-                    <Image VerticalAlignment="Center" Source="Resources/StatusAnnotations_Complete_and_ok_16xLG_color.png" Width="16" Height="16" Margin="1" />
-                    <TextBlock VerticalAlignment="Center">さくいん、更新完了</TextBlock></StackPanel>
-                <StackPanel Name="lUpdFail" Visibility="Collapsed" VerticalAlignment="Center">
-                    <Image VerticalAlignment="Center" Source="Resources/StatusAnnotations_Critical_16xLG_color.png" Width="16" Height="16" Margin="1" />
-                    <TextBlock VerticalAlignment="Center">さくいん、更新失敗!</TextBlock></StackPanel>
-
-                <StackPanel Name="lSe" Visibility="Collapsed" VerticalAlignment="Center" Orientation="Horizontal">
-                    <Image Name="iSe" VerticalAlignment="Center" Source="Resources/ajax-loader.gif" Width="16" Height="16" Margin="1" RenderTransformOrigin="0.5,0.5">
-    	                <Image.RenderTransform>
-			                <RotateTransform Angle="0" />
-		                </Image.RenderTransform>
-                    </Image>
-                    <TextBlock VerticalAlignment="Center">検索中</TextBlock>
-                </StackPanel>
-                <StackPanel Name="lSeDone" Visibility="Collapsed" VerticalAlignment="Center" Orientation="Horizontal">
-                    <Image VerticalAlignment="Center" Source="Resources/StatusAnnotations_Complete_and_ok_16xLG_color.png" Width="16" Height="16" Margin="1" />
-                    <TextBlock VerticalAlignment="Center">検索完了。<Run Name="rTot" />件</TextBlock></StackPanel>
-                <StackPanel Name="lSeFail" Visibility="Collapsed" VerticalAlignment="Center" Orientation="Horizontal">
-                    <Image VerticalAlignment="Center" Source="Resources/StatusAnnotations_Critical_16xLG_color.png" Width="16" Height="16" Margin="1" />
-                    <TextBlock VerticalAlignment="Center">検索失敗!</TextBlock></StackPanel>
-            </TextBlock>
-        </Label>
     </Grid>
 </Window>

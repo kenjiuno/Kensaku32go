@@ -11,18 +11,23 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace Kensaku32go {
+namespace Kensaku32go
+{
     /// <summary>
     /// VWin.xaml の相互作用ロジック
     /// </summary>
-    public partial class VWin : Window {
-        public VWin() {
+    public partial class VWin : Window
+    {
+        public VWin()
+        {
             InitializeComponent();
         }
 
-        private void cb_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+        private void cb_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
             var seli = lbItems.SelectedItem as Seli;
-            if (seli != null && seli.Pos != null) {
+            if (seli != null && seli.Pos != null)
+            {
                 rtb.Selection.Select(seli.Pos.ElementStart, seli.Pos.ElementEnd);
                 rtb.Focus();
                 var p = seli.Pos.Parent as Paragraph;

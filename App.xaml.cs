@@ -6,16 +6,20 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace Kensaku32go {
+namespace Kensaku32go
+{
     /// <summary>
     /// App.xaml の相互作用ロジック
     /// </summary>
-    public partial class App : Application {
+    public partial class App : Application
+    {
         public static string fpdb = null;
 
-        protected override void OnStartup(StartupEventArgs e) {
+        protected override void OnStartup(StartupEventArgs e)
+        {
             DispatcherUnhandledException += App_DispatcherUnhandledException;
-            foreach (String a in e.Args) {
+            foreach (String a in e.Args)
+            {
                 if (a.StartsWith("/") || a.StartsWith("--")) continue;
                 fpdb = a;
                 break;
@@ -23,7 +27,8 @@ namespace Kensaku32go {
             base.OnStartup(e);
         }
 
-        void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e) {
+        void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
             MessageBox.Show("" + e.Exception, "検索32号", MessageBoxButton.OK, MessageBoxImage.Stop);
         }
     }
