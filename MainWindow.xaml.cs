@@ -19,6 +19,7 @@ using Microsoft.Win32;
 using System.Data.SQLite;
 using Kensaku32go.Filters;
 using Kensaku32go.Utils;
+using System.Security.Policy;
 
 namespace Kensaku32go
 {
@@ -226,141 +227,159 @@ namespace Kensaku32go
             var dirInfoList = new Stack<io.DirectoryInfo>();
             var ents = new SortedDictionary<string, Entry>();
             {
-                String dir = io.Path.GetDirectoryName(dbFile);
+                if (App.dirs == null)
                 {
-                    using (var dr = new SQLiteCommand("select i,fp,mt,cb from f2", db).ExecuteReader())
+                    App.dirs = new string[] { io.Path.GetDirectoryName(dbFile) };
+                }
+
+                using (var dr = new SQLiteCommand("select i,fp,mt,cb from f2", db).ExecuteReader())
+                {
+                    while (dr.Read())
                     {
-                        while (dr.Read())
+                        var fp = dr.GetString(1);
+                        ents[fp] = (new Entry
                         {
-                            var fp = dr.GetString(1);
-                            ents[fp] = (new Entry
-                            {
-                                AutoKey = dr.GetInt64(0),
-                                FilePath = fp,
-                                ModTime = dr.GetInt64(2),
-                                FileSize = dr.GetInt64(3),
-                            });
-                        }
+                            AutoKey = dr.GetInt64(0),
+                            FilePath = fp,
+                            ModTime = dr.GetInt64(2),
+                            FileSize = dr.GetInt64(3),
+                        });
                     }
                 }
-                dirInfoList.Push(new io.DirectoryInfo(dir));
-            }
 
-            var cmUpdate = new SQLiteCommand("update f2 set mt=@mt,cb=@cb,fts1=@fts1 where i=@i", db);
-            cmUpdate.Parameters.Add("mt", System.Data.DbType.Int64);
-            cmUpdate.Parameters.Add("cb", System.Data.DbType.Int64);
-            cmUpdate.Parameters.Add("fts1", System.Data.DbType.String);
-            cmUpdate.Parameters.Add("i", System.Data.DbType.Int64);
-
-            var cmInsert = new SQLiteCommand("insert into f2 (fp,mt,cb,fts1) values (@fp,@mt,@cb,@fts1)", db);
-            cmInsert.Parameters.Add("fp", System.Data.DbType.String);
-            cmInsert.Parameters.Add("mt", System.Data.DbType.Int64);
-            cmInsert.Parameters.Add("cb", System.Data.DbType.Int64);
-            cmInsert.Parameters.Add("fts1", System.Data.DbType.String);
-
-            var stat = new UpdateStat();
-            e.Result = stat;
-
-            while (dirInfoList.Count != 0)
-            {
-                var dirInfo = dirInfoList.Pop();
-                FileSystemInfo[] list;
-                try
+                foreach (var dir in App.dirs)
                 {
-                    list = dirInfo.GetFileSystemInfos();
+                    dirInfoList.Push(new io.DirectoryInfo(dir));
                 }
-                catch (UnauthorizedAccessException)
+
+                var cmUpdate = new SQLiteCommand("update f2 set mt=@mt,cb=@cb,fts1=@fts1 where i=@i", db);
+                cmUpdate.Parameters.Add("mt", System.Data.DbType.Int64);
+                cmUpdate.Parameters.Add("cb", System.Data.DbType.Int64);
+                cmUpdate.Parameters.Add("fts1", System.Data.DbType.String);
+                cmUpdate.Parameters.Add("i", System.Data.DbType.Int64);
+
+                var cmInsert = new SQLiteCommand("insert into f2 (fp,mt,cb,fts1) values (@fp,@mt,@cb,@fts1)", db);
+                cmInsert.Parameters.Add("fp", System.Data.DbType.String);
+                cmInsert.Parameters.Add("mt", System.Data.DbType.Int64);
+                cmInsert.Parameters.Add("cb", System.Data.DbType.Int64);
+                cmInsert.Parameters.Add("fts1", System.Data.DbType.String);
+
+                var stat = new UpdateStat();
+                e.Result = stat;
+
+                var walked = new HashSet<string>();
+
+                while (dirInfoList.Count != 0)
                 {
-                    continue;
-                }
-                foreach (var fsi in list)
-                {
-                    if (bwUpd.CancellationPending)
+                    var dirInfo = dirInfoList.Pop();
+                    if (IfSkip(dirInfo) || !walked.Add(dirInfo.FullName))
                     {
-                        return;
+                        continue;
                     }
-                    var fileInfo = fsi as io.FileInfo;
-                    if (fsi is io.DirectoryInfo)
+                    FileSystemInfo[] list;
+                    try
                     {
-                        dirInfoList.Push(fsi as io.DirectoryInfo);
+                        list = dirInfo.GetFileSystemInfos();
                     }
-                    else if (fileInfo != null && Filter(fileInfo))
+                    catch (UnauthorizedAccessException)
                     {
-                        Entry entry;
-                        bool needUpdate = true;
-                        if (ents.TryGetValue(fileInfo.FullName, out entry))
+                        continue;
+                    }
+                    foreach (var fsi in list)
+                    {
+                        if (bwUpd.CancellationPending)
                         {
-                            if (entry.ModTime == fileInfo.LastWriteTimeUtc.Ticks && entry.FileSize == fileInfo.Length)
-                            {
-                                needUpdate = false;
-                                entry.Keep = true;
-                            }
-                            else
-                            {
-                                entry.Keep = true;
-                            }
+                            return;
                         }
-                        else
+                        var fileInfo = fsi as io.FileInfo;
+                        if (fsi is io.DirectoryInfo)
                         {
-                            entry = new Entry
-                            {
-                                AutoKey = -1,
-                                FilePath = fileInfo.FullName,
-                                ModTime = fileInfo.LastWriteTimeUtc.Ticks,
-                                FileSize = fileInfo.Length,
-
-                                Keep = true,
-                            };
+                            dirInfoList.Push(fsi as io.DirectoryInfo);
                         }
-                        if (needUpdate)
+                        else if (fileInfo != null && Filter(fileInfo))
                         {
-                            try
+                            Entry entry;
+                            bool needUpdate = true;
+                            if (ents.TryGetValue(fileInfo.FullName, out entry))
                             {
-                                var text = IsPdf(fileInfo.FullName) ? GetTextUsingPdfium(fileInfo.FullName)
-                                    : IsText(fileInfo.FullName) ? GetTextFromTextFile(fileInfo.FullName)
-                                    : GetTextUsingIFilter(fileInfo.FullName);
-
-                                var text2 = ("" + text).Replace("￾", "").Normalize();
-
-                                if (entry.AutoKey != -1)
+                                if (entry.ModTime == fileInfo.LastWriteTimeUtc.Ticks && entry.FileSize == fileInfo.Length)
                                 {
-                                    cmUpdate.Parameters["mt"].Value = fileInfo.LastWriteTimeUtc.Ticks;
-                                    cmUpdate.Parameters["cb"].Value = fileInfo.Length;
-                                    cmUpdate.Parameters["fts1"].Value = text2;
-                                    cmUpdate.Parameters["i"].Value = entry.AutoKey;
-                                    cmUpdate.ExecuteNonQuery();
+                                    needUpdate = false;
+                                    entry.Keep = true;
                                 }
                                 else
                                 {
-                                    cmInsert.Parameters["fp"].Value = fileInfo.FullName;
-                                    cmInsert.Parameters["mt"].Value = fileInfo.LastWriteTimeUtc.Ticks;
-                                    cmInsert.Parameters["cb"].Value = fileInfo.Length;
-                                    cmInsert.Parameters["fts1"].Value = text2;
-                                    cmInsert.ExecuteNonQuery();
+                                    entry.Keep = true;
                                 }
-
-                                ++stat.numUpdated;
                             }
-                            catch (Exception err)
+                            else
                             {
-                                Debug.WriteLine("# {0}: {1}", fileInfo.FullName, err);
-                                ++stat.numFailed;
+                                entry = new Entry
+                                {
+                                    AutoKey = -1,
+                                    FilePath = fileInfo.FullName,
+                                    ModTime = fileInfo.LastWriteTimeUtc.Ticks,
+                                    FileSize = fileInfo.Length,
+
+                                    Keep = true,
+                                };
+                            }
+                            if (needUpdate)
+                            {
+                                try
+                                {
+                                    var text = IsPdf(fileInfo.FullName) ? GetTextUsingPdfium(fileInfo.FullName)
+                                        : IsText(fileInfo.FullName) ? GetTextFromTextFile(fileInfo.FullName)
+                                        : GetTextUsingIFilter(fileInfo.FullName);
+
+                                    var text2 = ("" + text).Replace("￾", "").Normalize();
+
+                                    if (entry.AutoKey != -1)
+                                    {
+                                        cmUpdate.Parameters["mt"].Value = fileInfo.LastWriteTimeUtc.Ticks;
+                                        cmUpdate.Parameters["cb"].Value = fileInfo.Length;
+                                        cmUpdate.Parameters["fts1"].Value = text2;
+                                        cmUpdate.Parameters["i"].Value = entry.AutoKey;
+                                        cmUpdate.ExecuteNonQuery();
+                                    }
+                                    else
+                                    {
+                                        cmInsert.Parameters["fp"].Value = fileInfo.FullName;
+                                        cmInsert.Parameters["mt"].Value = fileInfo.LastWriteTimeUtc.Ticks;
+                                        cmInsert.Parameters["cb"].Value = fileInfo.Length;
+                                        cmInsert.Parameters["fts1"].Value = text2;
+                                        cmInsert.ExecuteNonQuery();
+                                    }
+
+                                    ++stat.numUpdated;
+                                }
+                                catch (Exception err)
+                                {
+                                    Debug.WriteLine("# {0}: {1}", fileInfo.FullName, err);
+                                    ++stat.numFailed;
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            {
-                var cmDelete = new SQLiteCommand("delete from f2 where i=@i", db);
-                cmDelete.Parameters.Add("i", System.Data.DbType.Int64);
-
-                foreach (var entry in ents.Values.Where(it => !it.Keep))
                 {
-                    cmDelete.Parameters["i"].Value = entry.AutoKey;
-                    cmDelete.ExecuteNonQuery();
+                    var cmDelete = new SQLiteCommand("delete from f2 where i=@i", db);
+                    cmDelete.Parameters.Add("i", System.Data.DbType.Int64);
+
+                    foreach (var entry in ents.Values.Where(it => !it.Keep))
+                    {
+                        cmDelete.Parameters["i"].Value = entry.AutoKey;
+                        cmDelete.ExecuteNonQuery();
+                    }
                 }
             }
+        }
+
+        private bool IfSkip(DirectoryInfo dirInfo)
+        {
+            var name = dirInfo.Name.ToLowerInvariant();
+            return name == "appdata" || name.StartsWith(".");
         }
 
         private string GetTextFromTextFile(string filePath)

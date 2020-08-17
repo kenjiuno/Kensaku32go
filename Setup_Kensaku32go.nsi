@@ -60,6 +60,15 @@ Section "" ;No components page, name is not important
 SectionEnd ; end the section
 
 Function Shtcut
+  StrCpy $1 "$DESKTOP"
+  CreateShortCut "$1\検索32号.lnk" "$INSTDIR\${APP}.exe"
+
+  StrCpy $1 "$SMPROGRAMS\検索32号"
+  CreateDirectory $1
+  CreateShortCut "$1\検索32号.lnk" "$INSTDIR\${APP}.exe"
+  CreateShortCut "$1\けんさく32ごう.lnk" "$INSTDIR\${APP}.exe"
+  CreateShortCut "$1\Kensaku32go.lnk" "$INSTDIR\${APP}.exe"
+
   WriteRegStr HKCU "Software\Classes\.Kensaku32go" "" "Kensaku32go"
   WriteRegStr HKCU "Software\Classes\.Kensaku32go\ShellNew" "ItemName" "検索32号の辞書"
   WriteRegStr HKCU "Software\Classes\.Kensaku32go\ShellNew" "NullFile" ""

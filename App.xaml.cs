@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -14,6 +14,7 @@ namespace Kensaku32go
     public partial class App : Application
     {
         public static string fpdb = null;
+        public static string[] dirs;
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -24,7 +25,18 @@ namespace Kensaku32go
                 fpdb = a;
                 break;
             }
-            base.OnStartup(e);
+            if (fpdb == null)
+            {
+                MainWindow = new StartupWindow();
+                MainWindow.Show();
+                return;
+            }
+            else
+            {
+                MainWindow = new MainWindow();
+                MainWindow.Show();
+                return;
+            }
         }
 
         void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)

@@ -193,8 +193,6 @@ namespace Kensaku32go.Utils
             //M. Takahashi's suggestion
             //utf8 += utf8 / 2;
 
-            System.Diagnostics.Debug.WriteLine(
-                string.Format("sjis = {0}, euc = {1}, utf8 = {2}", sjis, euc, utf8));
             if (euc > sjis && euc > utf8)
             {
                 //EUC
