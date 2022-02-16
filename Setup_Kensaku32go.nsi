@@ -85,6 +85,9 @@ Section /o  "x86" o86
   SetOutPath "$INSTDIR"
   File /r /x "*.vshost.*" "bin\x86\DEBUG\*.*"
   File                        "x86\*.*"
+  SetOutPath     "$INSTDIR\TestIFilter"
+  File /r /x "*.vshost.*" "TestIFilter\bin\x86\DEBUG\*.*"
+  SetOutPath "$INSTDIR"
 
   StrCpy $2 "32"
   Call Shtcut
@@ -94,9 +97,17 @@ Section /o  "x64" o64
   SetOutPath "$INSTDIR"
   File /r /x "*.vshost.*" "bin\x64\DEBUG\*.*"
   File                        "x64\*.*"
+  SetOutPath     "$INSTDIR\TestIFilter"
+  File /r /x "*.vshost.*" "TestIFilter\bin\x64\DEBUG\*.*"
+  SetOutPath "$INSTDIR"
 
   StrCpy $2 "64"
   Call Shtcut
+SectionEnd
+
+Section "TestIFilter"
+  SetOutPath "$INSTDIR\TestIFilter"
+  Exec '"$INSTDIR\TestIFilter\TestIFilter.exe"'
 SectionEnd
 
 Function .onInit

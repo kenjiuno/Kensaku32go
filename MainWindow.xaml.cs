@@ -17,9 +17,9 @@ using System.Text.RegularExpressions;
 using System.Collections.ObjectModel;
 using Microsoft.Win32;
 using System.Data.SQLite;
-using Kensaku32go.Filters;
 using Kensaku32go.Utils;
 using System.Security.Policy;
+using LibIFilter;
 
 namespace Kensaku32go
 {
@@ -406,51 +406,7 @@ namespace Kensaku32go
 
         private string GetTextUsingIFilter(string filePath)
         {
-            IFilter filter = null;
-            int hr = FilterClass.LoadIFilter(filePath, null, ref filter);
-            if (hr < 0)
-            {
-                throw Marshal.GetExceptionForHR(hr);
-            }
-            StringWriter writer = new StringWriter();
-            try
-            {
-                IFILTER_FLAGS ff;
-                hr = filter.Init(IFILTER_INIT.IFILTER_INIT_CANON_PARAGRAPHS | IFILTER_INIT.IFILTER_INIT_HARD_LINE_BREAKS | IFILTER_INIT.IFILTER_INIT_APPLY_INDEX_ATTRIBUTES,
-                    0,
-                    IntPtr.Zero,
-                    out ff
-                    );
-                if (hr != 0) throw Marshal.GetExceptionForHR(hr);
-
-                StringBuilder str = new StringBuilder(30000);
-                while (true)
-                {
-                    STAT_CHUNK chunk;
-                    hr = filter.GetChunk(out chunk);
-                    if (hr != 0) break;
-
-                    String row = "";
-                    while (true)
-                    {
-                        int cwc = 30000;
-                        hr = filter.GetText(ref cwc, str);
-                        if (hr != 0) break;
-
-                        str.Length = cwc;
-                        row += "" + str;
-                    }
-
-                    writer.WriteLine(row);
-
-                }
-
-                return writer.ToString();
-            }
-            finally
-            {
-                Marshal.ReleaseComObject(filter);
-            }
+            return TextExtractor.GetTextUsingIFilterAsync(filePath).Result;
         }
 
         private bool Filter(FileInfo fileInfo) => allowedExts.Contains(fileInfo.Extension.ToLowerInvariant());
