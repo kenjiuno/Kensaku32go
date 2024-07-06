@@ -17,7 +17,7 @@ namespace LibIFilter
                 () =>
                 {
                     IFilter filter;
-                    int hr = FilterClass.LoadIFilter2(filePath, out filter);
+                    int hr = FilterClass.LoadIFilter3(filePath, out filter);
                     if (hr < 0)
                     {
                         throw Marshal.GetExceptionForHR(hr);

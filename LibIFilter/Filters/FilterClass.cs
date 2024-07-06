@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Dynamic;
 using System.Linq;
 using System.Reflection;
@@ -70,7 +71,13 @@ namespace LibIFilter.Filters
             return hr;
         }
 
-        internal static int LoadIFilter2(string pwcsPath, out IFilter filter)
+        [DllImport("IFilterProxy.dll", SetLastError = true, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+        internal static extern int CreateIFilterProxy(
+            [In, MarshalAs(UnmanagedType.IUnknown)] object pUnk,
+            [Out, MarshalAs(UnmanagedType.Interface)] out IFilter ppFilter
+        );
+
+        internal static int LoadIFilter3(string pwcsPath, out IFilter filter)
         {
             object filterUnk;
             var hr = LoadIFilter(pwcsPath, null, out filterUnk);
@@ -82,91 +89,16 @@ namespace LibIFilter.Filters
                 }
                 else
                 {
-                    filter = new Wrapper(filterUnk);
+                    hr = CreateIFilterProxy(filterUnk, out filter);
+                    if (hr < 0)
+                    {
+                        throw new Win32Exception(hr);
+                    }
                 }
                 return 0;
             }
             filter = null;
             return hr;
-        }
-
-        class Wrapper : IFilter
-        {
-            private readonly object target;
-
-            public Wrapper(object target)
-            {
-                this.target = target;
-            }
-
-            private object Invoke(string name, object[] args)
-            {
-                foreach (var iface in target.GetType().GetInterfaces())
-                {
-                    var met = iface.GetMethod(name);
-                    if (met == null)
-                    {
-                        continue;
-                    }
-                    return met.Invoke(target, args);
-                }
-                throw new MissingMethodException();
-            }
-
-            int IFilter.Init(IFILTER_INIT grfFlags, int cAttributes, IntPtr aAttributes, out IFILTER_FLAGS pdwFlags)
-            {
-                var args = new object[] {
-                    grfFlags, cAttributes, aAttributes, null
-                };
-                try
-                {
-                    return (int)Invoke("Init", args);
-                }
-                finally
-                {
-                    pdwFlags = (IFILTER_FLAGS)args[3];
-                }
-            }
-
-            int IFilter.GetChunk(out STAT_CHUNK pStat)
-            {
-                var args = new object[] {
-                    null
-                };
-                try
-                {
-                    return (int)Invoke("GetChunk", args);
-                }
-                finally
-                {
-                    pStat = (STAT_CHUNK)args[0];
-                }
-            }
-
-            int IFilter.GetText(ref int pcwcBuffer, StringBuilder awcBuffer)
-            {
-                var args = new object[] {
-                    pcwcBuffer, awcBuffer
-                };
-                try
-                {
-                    return (int)Invoke("GetText", args);
-                }
-                finally
-                {
-                    pcwcBuffer = (int)args[0];
-                }
-            }
-
-            int IFilter.GetValue(ref IntPtr PropVal)
-            {
-                throw new NotImplementedException();
-            }
-
-            int IFilter.BindRegion(ref FILTERREGION origPos, ref Guid riid, ref object ppunk)
-            {
-                throw new NotImplementedException();
-            }
         }
     }
 }
