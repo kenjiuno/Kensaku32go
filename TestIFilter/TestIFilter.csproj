@@ -150,11 +150,10 @@
     <None Include="Resources\ajax-loader.gif" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\LibIFilter\LibIFilter.csproj">
+    <ProjectReference Include="..\LibIFilter\LibIFilter.csproj">
       <Project>{552187e6-8678-43c8-a874-602a30e2c135}</Project>
       <Name>LibIFilter</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 
 [assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("0.5")]//here
+[assembly: AssemblyFileVersion("0.6")]//here
 
 // アセンブリに関する一般情報は以下の属性セットをとおして制御されます。
 // アセンブリに関連付けられている情報を変更するには、
@@ -15,7 +15,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Kensaku32go")]
-[assembly: AssemblyCopyright("Copyright (c)  2014, 2020")]
+[assembly: AssemblyCopyright("Copyright (c)  2014, 2024")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

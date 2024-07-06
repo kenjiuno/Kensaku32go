@@ -16,6 +16,9 @@ SetCompressor /solid lzma
 !define APP "Kensaku32go"
 !define TTL "検索32号"
 
+!system 'MySign "bin\x86\DEBUG\${APP}.exe" "bin\x64\DEBUG\${APP}.exe" "bin\x86\DEBUG\${APP}.exe" "LibIFilter\bin\Debug\LibIFilter.dll" "TestIFilter\bin\x86\Debug\TestIFilter.exe" "TestIFilter\bin\x64\Debug\TestIFilter.exe"'
+!finalize 'MySign "%1"'
+
 ; The name of the installer
 Name "${TTL}"
 

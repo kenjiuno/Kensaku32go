@@ -34,7 +34,7 @@ namespace TestIFilter
 
                 try
                 {
-                    await TextExtractor.GetTextUsingIFilterAsync(file);
+                    var text = await TextExtractor.GetTextUsingIFilterAsync(file);
                     ctl.Icon = Resources.StatusAnnotations_Complete_and_ok_16xLG_color;
                     ctl.Error = "";
                 }
